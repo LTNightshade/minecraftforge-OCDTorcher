@@ -2,9 +2,11 @@ package de.madone.ocdtorcher.registry;
 
 import de.madone.ocdtorcher.block.ModBlocks;
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
+import de.madone.ocdtorcher.capability.ModCapabilities;
 import de.madone.ocdtorcher.config.ModConfig;
 import de.madone.ocdtorcher.gui.ModGuiHandler;
 import de.madone.ocdtorcher.item.ModItems;
+import de.madone.ocdtorcher.network.ModNetwork;
 import de.madone.ocdtorcher.tile.ModTileEntities;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
@@ -58,6 +60,8 @@ InterModProcessEvent
 FMLServerAboutToStartEvent
 FMLServerStartingEvent
 FMLServerStartedEvent
+
+Special events:
 FMLFingerprintViolationEvent
 FMLModIdMappingEvent
 
@@ -71,36 +75,40 @@ public class ModRegistry {
     public ModRegistry() {
 
         // New registry Event (for adding own registries ? )
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onNewRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onNewRegistry);
 
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLCommonSetupEvent);
 
         // Register the setup method for Server
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLDedicatedServerSetupEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLDedicatedServerSetupEvent);
 
         // Register the setup method for Client
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLClientSetupEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLClientSetupEvent);
 
         // Register the enqueueIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInterModEnqueueEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInterModEnqueueEvent);
+
         // Register the processIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInterModProcessEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInterModProcessEvent);
 
         // Mod loading completed
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLLoadCompleteEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLLoadCompleteEvent);
 
         // Server before start
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLServerAboutToStartEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLServerAboutToStartEvent);
+
         // Server starting
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLServerStartingEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLServerStartingEvent);
+
         // Server after start
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLServerStartedEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLServerStartedEvent);
 
         // on Fingerprint Violations
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLFingerprintViolationEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLFingerprintViolationEvent);
+
         // on remapping Mod-IDs
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLModIdMappingEvent);
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLModIdMappingEvent);
 
 
         // Register Block
@@ -108,25 +116,25 @@ public class ModRegistry {
         // Register Item
         FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Item.class, this::onItemsRegistry);
         // Register DimensionType
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(DimensionType.class, this::onDimensionTypesRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(DimensionType.class, this::onDimensionTypesRegistry);
         // Register ModDimension
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(ModDimension.class, this::onModDimensionsRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(ModDimension.class, this::onModDimensionsRegistry);
         // Register Biome
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Biome.class, this::onBiomesRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Biome.class, this::onBiomesRegistry);
         // Register Enchantment
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Enchantment.class, this::onEnchantmentsRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Enchantment.class, this::onEnchantmentsRegistry);
         // Register EntityType
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(EntityType.class, this::onEntityTypeRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(EntityType.class, this::onEntityTypeRegistry);
         // Register Potion
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Potion.class, this::onPotionRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Potion.class, this::onPotionRegistry);
         // Register PotionType
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(PotionType.class, this::onPotionTypeRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(PotionType.class, this::onPotionTypeRegistry);
         // Register SoundEvent
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(SoundEvent.class, this::onSoundEventRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(SoundEvent.class, this::onSoundEventRegistry);
         // Register TileEntityType
         FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(TileEntityType.class, this::onTileEntityTypeRegistry);
         // Register VillagerProfession
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(VillagerRegistry.VillagerProfession.class, this::onVillagerProfessionRegistry);
+        // FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(VillagerRegistry.VillagerProfession.class, this::onVillagerProfessionRegistry);
 
         // load Configfile
         ModConfig.Init();
@@ -195,7 +203,8 @@ public class ModRegistry {
 
     private void onFMLCommonSetupEvent(final FMLCommonSetupEvent event) {
         LOGGER.info("Starting FMLCommonSetupEvent");
-        CapabilityOCDTorcher.register();
+        ModCapabilities.Init();
+        ModNetwork.Init();
     }
 
     private void onFMLDedicatedServerSetupEvent(final FMLDedicatedServerSetupEvent event) {
@@ -210,18 +219,11 @@ public class ModRegistry {
     private void onInterModEnqueueEvent(final InterModEnqueueEvent event) {
         LOGGER.info("Starting InterModEnqueueEvent");
         // some example code to dispatch IMC to another mod
-        InterModComms.sendTo("forge", "helloworld", () -> {
-            LOGGER.info("Hello world");
-            return "Hello world";
-        });
     }
 
     private void onInterModProcessEvent(final InterModProcessEvent event) {
         LOGGER.info("Starting InterModProcessEvent");
         // some example code to receive and process InterModComms from other mods
-        LOGGER.info("Got IMC", event.getIMCStream().
-                map(m -> m.getMessageSupplier().get()).
-                collect(Collectors.toList()));
     }
 
     private void onFMLLoadCompleteEvent(final FMLLoadCompleteEvent event) {

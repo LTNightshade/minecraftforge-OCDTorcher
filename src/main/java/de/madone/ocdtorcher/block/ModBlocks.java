@@ -1,15 +1,15 @@
 package de.madone.ocdtorcher.block;
 
-import de.madone.ocdtorcher.nimox;
+import de.madone.ocdtorcher.ocdtorcher;
 import net.minecraft.block.Block;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.ObjectHolder;
 
-@ObjectHolder(nimox.ModId)
+@ObjectHolder(ocdtorcher.ModId)
 public class ModBlocks {
 
-    public static NonNullList<BlockBase> BLOCKS = NonNullList.create();
+    public static NonNullList<Block> BLOCKS = NonNullList.create();
 
     @ObjectHolder("test")
     public static final BlockTest BLOCK_TEST = null;

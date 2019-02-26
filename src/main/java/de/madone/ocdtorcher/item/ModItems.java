@@ -1,14 +1,16 @@
 package de.madone.ocdtorcher.item;
 
-import de.madone.ocdtorcher.block.BlockBase;
 import de.madone.ocdtorcher.block.ModBlocks;
-import de.madone.ocdtorcher.nimox;
+import de.madone.ocdtorcher.ocdtorcher;
+import de.madone.ocdtorcher.registry.IBlockRegistry;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.ObjectHolder;
 
-@ObjectHolder(nimox.ModId)
+@ObjectHolder(ocdtorcher.ModId)
 public class ModItems {
 
     public static NonNullList<Item> ITEMS = NonNullList.create();
@@ -22,12 +24,14 @@ public class ModItems {
         ITEMS.add(new ItemOCDTorcher());
 
         // Itemblocks for Blocks
-        for(BlockBase b : ModBlocks.BLOCKS) {
-            ITEMS.add(b.getItemBlock());
+        for (Block b : ModBlocks.BLOCKS) {
+            if (b instanceof IBlockRegistry) {
+                ITEMS.add(new ItemBlock(b, ((IBlockRegistry) b).getDefaultProperties()).setRegistryName(b.getRegistryName().getPath()));
+            }
         }
 
         // Register Items
-        for(Item i : ITEMS) {
+        for (Item i : ITEMS) {
             itemRegistryEvent.getRegistry().register(i);
         }
     }

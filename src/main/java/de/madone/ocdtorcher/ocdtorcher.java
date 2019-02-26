@@ -10,8 +10,8 @@ import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(nimox.ModId)
-public class nimox {
+@Mod(ocdtorcher.ModId)
+public class ocdtorcher {
 
     public static final String ModId = "ocdtorcher";
 
@@ -20,14 +20,14 @@ public class nimox {
 
     protected static ModRegistry REGISTRY;
 
-    public static final ItemGroup ITEM_GROUP_NIMOX = new ItemGroup("NiMoX") {
+    public static final ItemGroup ITEM_GROUP_OCDTORCHER = new ItemGroup("OCD-Torcher") {
         @OnlyIn(Dist.CLIENT)
         public ItemStack createIcon() {
             return new ItemStack(ModItems.ITEM_OCD_TORCHER);
         }
-    }.setBackgroundImageName("tab_nimoxtab");
+    }.setBackgroundImageName("ocdtorchertab.png");
 
-    public nimox() {
+    public ocdtorcher() {
         REGISTRY = new ModRegistry();
     }
 

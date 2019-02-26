@@ -1,6 +1,6 @@
 package de.madone.ocdtorcher.capability;
 
-import de.madone.ocdtorcher.nimox;
+import de.madone.ocdtorcher.ocdtorcher;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -25,7 +25,7 @@ public class CapabilityOCDTorcher {
     @CapabilityInject(ICapabilityOCDTorcher.class)
     public static final Capability<ICapabilityOCDTorcher> OCD_TORCHER_CAPABILITY = null;
 
-    public static final ResourceLocation RLOC = new ResourceLocation(nimox.ModId, "ocd_torcher_capability");
+    public static final ResourceLocation RLOC = new ResourceLocation(ocdtorcher.ModId, "ocd_torcher_capability");
 
     public interface ICapabilityOCDTorcher extends INBTSerializable<NBTTagCompound> {
 

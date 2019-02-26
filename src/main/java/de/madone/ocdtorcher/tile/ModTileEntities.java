@@ -2,10 +2,10 @@ package de.madone.ocdtorcher.tile;
 
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.types.Type;
-import de.madone.ocdtorcher.block.BlockBase;
-import de.madone.ocdtorcher.block.BlockBaseTE;
 import de.madone.ocdtorcher.block.ModBlocks;
-import de.madone.ocdtorcher.nimox;
+import de.madone.ocdtorcher.ocdtorcher;
+import de.madone.ocdtorcher.registry.ITileEntityRegistry;
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
@@ -17,16 +17,16 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
 
-@ObjectHolder(nimox.ModId)
+@ObjectHolder(ocdtorcher.ModId)
 public class ModTileEntities {
 
-    @ObjectHolder("tile_block_test_te")
-    public static TileEntityType<?> testTETileEntityType;
+    //@ObjectHolder("tile_block_test_te")
+    //public static TileEntityType<?> testTETileEntityType;
 
     public static void Init(RegistryEvent.Register<TileEntityType<?>> event) {
-        for(BlockBase b : ModBlocks.BLOCKS) {
-            if (b instanceof BlockBaseTE)
-                registerTileEntityType(event.getRegistry(), register("tile_"+b.getRegistryName().getPath(), ((BlockBaseTE)b).getTETBuilder()), "tile_"+b.getRegistryName().getPath());
+        for(Block b : ModBlocks.BLOCKS) {
+            if (b instanceof ITileEntityRegistry)
+                registerTileEntityType(event.getRegistry(), register("tile_"+b.getRegistryName().getPath(), ((ITileEntityRegistry)b).getTETBuilder()), "tile_"+b.getRegistryName().getPath());
         }
     }
 

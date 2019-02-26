@@ -2,7 +2,7 @@ package de.madone.ocdtorcher.gui;
 
 import de.madone.ocdtorcher.container.ContainerOCDTorcher;
 import de.madone.ocdtorcher.item.ItemOCDTorcher;
-import de.madone.ocdtorcher.nimox;
+import de.madone.ocdtorcher.ocdtorcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,9 +18,7 @@ import net.minecraftforge.fml.network.FMLPlayMessages.OpenContainer;
 import javax.annotation.Nullable;
 
 
-public class ModGuiHandler implements IGuiHandler {
-
-    public static ModGuiHandler INSTANCE;
+public class ModGuiHandler {
 
     public enum EnumGuis implements IStringSerializable {
         TORCHER_GUI("torcher_gui", 0);
@@ -58,45 +56,25 @@ public class ModGuiHandler implements IGuiHandler {
     }
 
     public static void Init() {
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.GUIFACTORY, () -> (OpenContainer oc) -> {
-            if (nimox.ModId.equalsIgnoreCase(oc.getId().getNamespace())) {
-                EnumGuis gui = EnumGuis.getByName(oc.getId().getPath());
-                if (gui == null)
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.GUIFACTORY,
+                () -> (OpenContainer oc) -> {
+                    if (ocdtorcher.ModId.equalsIgnoreCase(oc.getId().getNamespace())) {
+                        EnumGuis gui = EnumGuis.getByName(oc.getId().getPath());
+                        if (gui == null)
+                            return null;
+                        EntityPlayerSP player = Minecraft.getInstance().player;
+                        ItemStack is = player.getHeldItemMainhand().getItem() instanceof ItemOCDTorcher ? player.getHeldItemMainhand() : player.getHeldItemOffhand();
+                        World world = Minecraft.getInstance().world;
+                        BlockPos pos = player.getPosition();
+                        if (oc.getAdditionalData().isReadable(8)) {
+                            pos = oc.getAdditionalData().readBlockPos();
+                        }
+                        switch (gui) {
+                            case TORCHER_GUI:
+                                return new GuiContainerOCDTorcher(new ContainerOCDTorcher(player));
+                        }
+                    }
                     return null;
-                EntityPlayerSP player = Minecraft.getInstance().player;
-                ItemStack is = player.getHeldItemMainhand().getItem() instanceof ItemOCDTorcher ? player.getHeldItemMainhand() : player.getHeldItemOffhand();
-                World world = Minecraft.getInstance().world;
-                BlockPos pos = player.getPosition();
-                if (oc.getAdditionalData().isReadable(8)) {
-                    pos = oc.getAdditionalData().readBlockPos();
-                }
-                switch (gui) {
-                    case TORCHER_GUI:
-                        return new GuiContainerOCDTorcher(new ContainerOCDTorcher(player));
-                }
-            }
-            return null;
-        });
-    }
-
-
-    @Nullable
-    @Override
-    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        switch (EnumGuis.values()[ID]) {
-            case TORCHER_GUI:
-                return new ContainerOCDTorcher(player);
-        }
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        switch (EnumGuis.values()[ID]) {
-            case TORCHER_GUI:
-                return new GuiContainerOCDTorcher((ContainerOCDTorcher) getServerGuiElement(ID, player, world, x, y, z));
-        }
-        return null;
+                });
     }
 }

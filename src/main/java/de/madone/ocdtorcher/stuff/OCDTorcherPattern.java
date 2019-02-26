@@ -72,4 +72,5 @@ public class OCDTorcherPattern implements INBTSerializable<NBTTagCompound> {
         }
         return false;
     }
+
 }

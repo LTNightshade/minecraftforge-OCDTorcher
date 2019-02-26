@@ -3,7 +3,8 @@ package de.madone.ocdtorcher.item;
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.container.ContainerOCDTorcher;
 import de.madone.ocdtorcher.gui.ModGuiHandler;
-import de.madone.ocdtorcher.nimox;
+import de.madone.ocdtorcher.network.client.CPacketOCDTorcher;
+import de.madone.ocdtorcher.ocdtorcher;
 import de.madone.ocdtorcher.stuff.InventoryHelper;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockTorch;
@@ -30,19 +31,21 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
-public class ItemOCDTorcher extends ItemBase {
+public class ItemOCDTorcher extends Item {
 
     private static final int Distance = 20;
+    protected String name;
 
     public ItemOCDTorcher() {
-        super("ocd_torcher",
-                new Properties()
-                        .rarity(EnumRarity.RARE)
-                        .maxStackSize(1)
-                        .defaultMaxDamage(0)
-                        .setNoRepair()
-                        .group(nimox.ITEM_GROUP_NIMOX)
+        super(new Properties()
+                .rarity(EnumRarity.RARE)
+                .maxStackSize(1)
+                .defaultMaxDamage(0)
+                .setNoRepair()
+                .group(ocdtorcher.ITEM_GROUP_OCDTORCHER)
         );
+        this.name = "ocd_torcher";
+        this.setRegistryName("ocd_torcher");
     }
 
     @Nullable
@@ -79,7 +82,7 @@ public class ItemOCDTorcher extends ItemBase {
 
                         @Override
                         public String getGuiID() {
-                            return new ResourceLocation(nimox.ModId, ModGuiHandler.EnumGuis.TORCHER_GUI.getName()).toString();
+                            return new ResourceLocation(ocdtorcher.ModId, ModGuiHandler.EnumGuis.TORCHER_GUI.getName()).toString();
                         }
 
                         @Override
@@ -112,7 +115,7 @@ public class ItemOCDTorcher extends ItemBase {
             return;
 
         long t = worldIn.getGameTime();
-        if(t % 20 != 0)
+        if (t % 20 != 0)
             return;
 
         if (entityIn instanceof EntityPlayerMP) {
