@@ -1,0 +1,12 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "textures": {
+      "all": "nimox:block/ore_copper"
+    },
+    "model": "nimox:test"
+  },
+  "variants": {
+    "": [{}]
+  }
+}
