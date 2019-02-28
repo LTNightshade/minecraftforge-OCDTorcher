@@ -218,7 +218,6 @@ public class ModRegistry {
         LOGGER.info("Starting FMLDedicatedServerSetupEvent");
     }
 
-
     private void onFMLClientSetupEvent(final FMLClientSetupEvent event) {
         LOGGER.info("Starting FMLClientSetupEvent");
     }

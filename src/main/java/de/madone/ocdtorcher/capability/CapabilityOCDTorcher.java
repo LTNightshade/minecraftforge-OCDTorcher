@@ -66,24 +66,22 @@ public class CapabilityOCDTorcher {
 
     public static class Provider implements ICapabilitySerializable<NBTTagCompound> {
 
-        Implementation impl = new CapabilityOCDTorcher().new Implementation();
-        private final LazyOptional<ICapabilityOCDTorcher> holder = LazyOptional.of(() -> impl);
+        private LazyOptional<ICapabilityOCDTorcher> holder = LazyOptional.of(() -> new CapabilityOCDTorcher().new Implementation());
 
         @Override
         public NBTTagCompound serializeNBT() {
-            return impl.serializeNBT();
+            return holder.orElseThrow(NullPointerException::new).serializeNBT();
         }
 
         @Override
         public void deserializeNBT(NBTTagCompound nbt) {
-            impl.deserializeNBT(nbt);
+            holder.orElseThrow(NullPointerException::new).deserializeNBT(nbt);
         }
 
         @Nonnull
         @SuppressWarnings("ConstantConditions")
         @Override
         public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable EnumFacing side) {
-
             return CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY.orEmpty(cap, holder);
         }
 
