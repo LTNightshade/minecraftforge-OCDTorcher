@@ -1,14 +1,14 @@
 package de.madone.ocdtorcher.network.client;
 
+import com.sun.istack.internal.NotNull;
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.item.ItemOCDTorcher;
 import de.madone.ocdtorcher.network.ModNetwork;
-import de.madone.ocdtorcher.stuff.OCDTorcherPattern;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 public class CPacketOCDTorcher {
 
-    protected static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public enum CommandID implements IStringSerializable {
         NONE(0, "none"),
@@ -40,6 +40,7 @@ public class CPacketOCDTorcher {
             return index;
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
         public String getName() {
             return name;
@@ -85,11 +86,16 @@ public class CPacketOCDTorcher {
     }
 
     public static class Handler {
+        @SuppressWarnings("ConstantConditions")
         public static void handle(final CPacketOCDTorcher pkt, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> {
                 LOGGER.info("Receiving OCD Torcher data from client.");
                 EntityPlayerMP player = ctx.get().getSender();
+
+                assert player != null;
+
                 ItemStack torcher = player.getHeldItemMainhand().getItem() instanceof ItemOCDTorcher ? player.getHeldItemMainhand() : player.getHeldItemOffhand();
+
                 CapabilityOCDTorcher.ICapabilityOCDTorcher cap = torcher.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
                 switch (pkt.data.command_id) {
                     case BUTTON_ENABLE:
@@ -108,6 +114,7 @@ public class CPacketOCDTorcher {
                         cap.GetPattern().setHeight(pkt.data.value);
                         break;
                 }
+                ModNetwork.sendOCDTorcherData(cap.GetEnabled(), cap.GetPickupEnabled(), cap.GetOrigin(), cap.GetPattern(), player);
                 ctx.get().setPacketHandled(true);
             });
         }

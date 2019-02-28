@@ -3,19 +3,16 @@ package de.madone.ocdtorcher.gui;
 import de.madone.ocdtorcher.container.ContainerOCDTorcher;
 import de.madone.ocdtorcher.item.ItemOCDTorcher;
 import de.madone.ocdtorcher.ocdtorcher;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.network.FMLPlayMessages.OpenContainer;
-
-import javax.annotation.Nullable;
 
 
 public class ModGuiHandler {
@@ -36,6 +33,7 @@ public class ModGuiHandler {
             return name;
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
         public String getName() {
             return name;
@@ -63,12 +61,6 @@ public class ModGuiHandler {
                         if (gui == null)
                             return null;
                         EntityPlayerSP player = Minecraft.getInstance().player;
-                        ItemStack is = player.getHeldItemMainhand().getItem() instanceof ItemOCDTorcher ? player.getHeldItemMainhand() : player.getHeldItemOffhand();
-                        World world = Minecraft.getInstance().world;
-                        BlockPos pos = player.getPosition();
-                        if (oc.getAdditionalData().isReadable(8)) {
-                            pos = oc.getAdditionalData().readBlockPos();
-                        }
                         switch (gui) {
                             case TORCHER_GUI:
                                 return new GuiContainerOCDTorcher(new ContainerOCDTorcher(player));

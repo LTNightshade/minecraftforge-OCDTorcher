@@ -1,6 +1,5 @@
 package de.madone.ocdtorcher.gui;
 
-import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.container.ContainerOCDTorcher;
 import de.madone.ocdtorcher.network.ModNetwork;
 import de.madone.ocdtorcher.network.client.CPacketOCDTorcher;
@@ -9,7 +8,6 @@ import de.madone.ocdtorcher.stuff.OCDTorcherPattern;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -37,7 +35,6 @@ public class GuiContainerOCDTorcher extends GuiContainer {
     private boolean PickUpEnabled;
     private BlockPos Origin;
     private OCDTorcherPattern Pattern;
-
 
     public GuiContainerOCDTorcher(ContainerOCDTorcher container) {
         super(container);
@@ -139,8 +136,12 @@ public class GuiContainerOCDTorcher extends GuiContainer {
     }
 
     private void TextAccepted(Integer button, String s) {
+
+        if (s.equalsIgnoreCase(""))
+            return;
+
         int y = TryParse(s);
-        if ((y > 1) & (y < 255)) {
+        if ((y > 0) & (y < 256)) {
             switch (button) {
                 case 6:
                     if (Pattern.getWidth() != y) {
@@ -190,12 +191,15 @@ public class GuiContainerOCDTorcher extends GuiContainer {
         this.PickUpEnabled = container.isPickUpEnabled();
         this.Origin = container.getOrigin();
         this.Pattern = container.getPattern();
-
-        if (!tf_pattern_x.getText().equalsIgnoreCase(String.format("%d", Pattern.getWidth()))) {
-            tf_pattern_x.setText(String.format("%d", Pattern.getWidth()));
+        if (!tf_pattern_x.isFocused()) {
+            if (!tf_pattern_x.getText().equalsIgnoreCase(String.format("%d", Pattern.getWidth()))) {
+                tf_pattern_x.setText(String.format("%d", Pattern.getWidth()));
+            }
         }
-        if (!tf_pattern_z.getText().equalsIgnoreCase(String.format("%d", Pattern.getHeight()))) {
-            tf_pattern_z.setText(String.format("%d", Pattern.getHeight()));
+        if (!tf_pattern_z.isFocused()) {
+            if (!tf_pattern_z.getText().equalsIgnoreCase(String.format("%d", Pattern.getHeight()))) {
+                tf_pattern_z.setText(String.format("%d", Pattern.getHeight()));
+            }
         }
         if (ButtonEnabled.isState() != Enabled) {
             ButtonEnabled.setState(Enabled);
@@ -209,26 +213,32 @@ public class GuiContainerOCDTorcher extends GuiContainer {
         //String name = I18n.format("gui.torcher.name");
         //fontRenderer.drawString(name, xSize / 2 - fontRenderer.getStringWidth(name) / 2, 6, 0x404040);
         fontRenderer.drawString(inventoryPlayer.getDisplayName().getUnformattedComponentText(), 8, ySize - 94, 0x404040);
-        fontRenderer.drawString(String.format("%d,%d,%d", Origin.getX(), Origin.getY(), Origin.getZ()), 108/2, 52/2, 0x404040);
+        fontRenderer.drawString(String.format("%d,%d,%d", Origin.getX(), Origin.getY(), Origin.getZ()), (108f / 2f), (52f / 2f), 0x404040);
         tf_pattern_x.drawTextField(0, 0, 0);
         tf_pattern_z.drawTextField(0, 0, 0);
     }
 
     @Override
-    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
+    public boolean keyPressed(int KeyCode, int p_keyPressed_2_, int p_keyPressed_3_) {
+        if (KeyCode == 257) {
+            tf_pattern_x.setFocused(false);
+            tf_pattern_z.setFocused(false);
+        }
         if (tf_pattern_x.isFocused()) {
-            return tf_pattern_x.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+            return tf_pattern_x.keyPressed(KeyCode, p_keyPressed_2_, p_keyPressed_3_);
         } else if (tf_pattern_z.isFocused()) {
-            return tf_pattern_z.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+            return tf_pattern_z.keyPressed(KeyCode, p_keyPressed_2_, p_keyPressed_3_);
         } else
-            return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-
+            return super.keyPressed(KeyCode, p_keyPressed_2_, p_keyPressed_3_);
     }
 
+
     @Override
-    public boolean charTyped(char p_charTyped_1_, int p_charTyped_2_) {
-        if (tf_pattern_x.isFocused()) return tf_pattern_x.charTyped(p_charTyped_1_, p_charTyped_2_);
-        else if (tf_pattern_z.isFocused()) return tf_pattern_z.charTyped(p_charTyped_1_, p_charTyped_2_);
+    public boolean charTyped(char Key, int p_charTyped_2_) {
+        if ("0123456789".indexOf(Key) > -1) {
+            if (tf_pattern_x.isFocused()) return tf_pattern_x.charTyped(Key, p_charTyped_2_);
+            else if (tf_pattern_z.isFocused()) return tf_pattern_z.charTyped(Key, p_charTyped_2_);
+        }
         return false;
     }
 

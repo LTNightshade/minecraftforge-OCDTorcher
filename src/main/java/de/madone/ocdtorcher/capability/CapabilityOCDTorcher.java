@@ -1,7 +1,7 @@
 package de.madone.ocdtorcher.capability;
 
 import de.madone.ocdtorcher.ocdtorcher;
-import net.minecraft.item.ItemStack;
+import de.madone.ocdtorcher.stuff.OCDTorcherPattern;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -15,7 +15,6 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import de.madone.ocdtorcher.stuff.OCDTorcherPattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,8 +54,7 @@ public class CapabilityOCDTorcher {
         @Nullable
         @Override
         public INBTBase writeNBT(Capability<ICapabilityOCDTorcher> capability, ICapabilityOCDTorcher instance, EnumFacing side) {
-            NBTTagCompound compound = instance.serializeNBT();
-            return compound;
+            return instance.serializeNBT();
         }
 
         @Override
@@ -82,8 +80,10 @@ public class CapabilityOCDTorcher {
         }
 
         @Nonnull
+        @SuppressWarnings("ConstantConditions")
         @Override
         public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable EnumFacing side) {
+
             return CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY.orEmpty(cap, holder);
         }
 
@@ -166,7 +166,7 @@ public class CapabilityOCDTorcher {
     public static class Factory implements Callable<ICapabilityOCDTorcher> {
 
         @Override
-        public ICapabilityOCDTorcher call() throws Exception {
+        public ICapabilityOCDTorcher call() {
             return new CapabilityOCDTorcher().new Implementation();
         }
     }

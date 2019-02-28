@@ -16,7 +16,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionType;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.biome.Biome;
@@ -26,7 +25,7 @@ import net.minecraftforge.common.ModDimension;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import net.minecraftforge.fml.event.lifecycle.*;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
@@ -35,8 +34,6 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.stream.Collectors;
 
 //region Eventlist
 /*
@@ -214,7 +211,7 @@ public class ModRegistry {
     private void onFMLCommonSetupEvent(final FMLCommonSetupEvent event) {
         LOGGER.info("Starting FMLCommonSetupEvent");
         ModCapabilities.Init();
-        ModNetwork.Init();
+        DeferredWorkQueue.runLater(ModNetwork::Init);
     }
 
     private void onFMLDedicatedServerSetupEvent(final FMLDedicatedServerSetupEvent event) {

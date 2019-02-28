@@ -2,8 +2,8 @@ package de.madone.ocdtorcher.gui;
 
 import de.madone.ocdtorcher.ocdtorcher;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiButtonImage;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -11,8 +11,8 @@ import java.util.function.BiConsumer;
 
 public class GuiToggleImageButton extends GuiButton {
 
-    public static final ResourceLocation RLOCOFF = new ResourceLocation(ocdtorcher.ModId, "textures/gui/gui_toggle_button_off.png");
-    public static final ResourceLocation RLOCON = new ResourceLocation(ocdtorcher.ModId, "textures/gui/gui_toggle_button_on.png");
+    private static final ResourceLocation RLOCOFF = new ResourceLocation(ocdtorcher.ModId, "textures/gui/gui_toggle_button_off.png");
+    private static final ResourceLocation RLOCON = new ResourceLocation(ocdtorcher.ModId, "textures/gui/gui_toggle_button_on.png");
 
     private boolean state = false;
     private BiConsumer<Integer, Boolean> guiResponder;
@@ -32,11 +32,11 @@ public class GuiToggleImageButton extends GuiButton {
             this.hovered = isMouseOver();
             if (state) {
                 Minecraft.getInstance().getTextureManager().bindTexture(RLOCON);
-                this.drawModalRectWithCustomSizedTexture(this.x, this.y, 0, 0, this.width, this.height, this.width, this.height * 2);
+                Gui.drawModalRectWithCustomSizedTexture(this.x, this.y, 0, 0, this.width, this.height, this.width, this.height * 2);
             }
             else {
                 Minecraft.getInstance().getTextureManager().bindTexture(RLOCOFF);
-                this.drawModalRectWithCustomSizedTexture(this.x, this.y, 0, 0, this.width, this.height, this.width, this.height * 2);
+                Gui.drawModalRectWithCustomSizedTexture(this.x, this.y, 0, 0, this.width, this.height, this.width, this.height * 2);
             }
 
         }
