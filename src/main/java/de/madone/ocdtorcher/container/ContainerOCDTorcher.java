@@ -2,6 +2,7 @@ package de.madone.ocdtorcher.container;
 
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.item.ItemOCDTorcher;
+import de.madone.ocdtorcher.network.server.SPacketOCDTorcher;
 import de.madone.ocdtorcher.stuff.OCDTorcherPattern;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -23,7 +24,6 @@ public class ContainerOCDTorcher extends Container {
 
     private ItemStack torcher;
     private EntityPlayer player;
-    private BlockPos pos;
     private IItemHandler inventory;
     private CapabilityOCDTorcher.ICapabilityOCDTorcher cap;
 
@@ -31,16 +31,16 @@ public class ContainerOCDTorcher extends Container {
     private boolean PickUpEnabled;
     private BlockPos Origin;
     private OCDTorcherPattern Pattern;
+    private boolean IsFirstRun = true;
 
     public ContainerOCDTorcher(EntityPlayer player) {
         this.player = player;
-        this.pos = player.getPosition();
         this.torcher = (player.getHeldItemMainhand().getItem() instanceof ItemOCDTorcher) ? player.getHeldItemMainhand() : player.getHeldItem(EnumHand.OFF_HAND);
         cap = torcher.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
         this.Enabled = cap.GetEnabled();
         this.PickUpEnabled = cap.GetPickupEnabled();
         this.Origin = cap.GetOrigin();
-        this.Pattern = cap.GetPattern();
+        this.Pattern = cap.GetPattern().Copy();
 
         if (cap != null) {
             inventory = cap.GetInventory();
@@ -70,10 +70,6 @@ public class ContainerOCDTorcher extends Container {
         return player;
     }
 
-    public BlockPos getPos() {
-        return pos;
-    }
-
     public void AddPlayerInventory(int x, int y) {
         // 14,191
         int i = 0;
@@ -98,8 +94,9 @@ public class ContainerOCDTorcher extends Container {
 
     @Override
     public void detectAndSendChanges() {
-        LOGGER.info("Starting DetectChanges");
+
         super.detectAndSendChanges();
+
         for (int i = 0; i < this.listeners.size(); i++) {
             IContainerListener icontainerlistener = this.listeners.get(i);
 
@@ -127,11 +124,22 @@ public class ContainerOCDTorcher extends Container {
             if (this.Pattern.getHeight() != cap.GetPattern().getHeight()) {
                 icontainerlistener.sendWindowProperty(this, 7, cap.GetPattern().getHeight());
             }
+            if (this.IsFirstRun) {
+                this.IsFirstRun = false;
+                icontainerlistener.sendWindowProperty(this, 0, cap.GetEnabled() ? 1 : 0);
+                icontainerlistener.sendWindowProperty(this, 1, cap.GetPickupEnabled() ? 1 : 0);
+                icontainerlistener.sendWindowProperty(this, 2, cap.GetPattern().isAlternating() ? 1 : 0);
+                icontainerlistener.sendWindowProperty(this, 3, cap.GetOrigin().getX());
+                icontainerlistener.sendWindowProperty(this, 4, cap.GetOrigin().getY());
+                icontainerlistener.sendWindowProperty(this, 5, cap.GetOrigin().getZ());
+                icontainerlistener.sendWindowProperty(this, 6, cap.GetPattern().getWidth());
+                icontainerlistener.sendWindowProperty(this, 7, cap.GetPattern().getHeight());
+            }
         }
         this.Enabled = cap.GetEnabled();
         this.PickUpEnabled = cap.GetPickupEnabled();
         this.Origin = cap.GetOrigin();
-        this.Pattern = cap.GetPattern();
+        this.Pattern = cap.GetPattern().Copy();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -180,5 +188,12 @@ public class ContainerOCDTorcher extends Container {
 
     public OCDTorcherPattern getPattern() {
         return Pattern;
+    }
+
+    public void ProcessMessage(SPacketOCDTorcher.PacketTorcher data) {
+        this.Enabled = data.isEnabled();
+        this.PickUpEnabled = data.isPickUpEnabled();
+        this.Origin = data.getOrigin();
+        this.Pattern = data.getPattern().Copy();
     }
 }

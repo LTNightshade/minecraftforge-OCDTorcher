@@ -97,7 +97,6 @@ public class CPacketOCDTorcher {
                         break;
                     case BUTTON_PICKUP:
                         cap.SetPickupEnabled(pkt.data.value == 1);
-                        LOGGER.info("Received Message");
                         break;
                     case BUTTON_ALTERNATE:
                         cap.GetPattern().setAlternating(pkt.data.value == 1);
@@ -108,43 +107,9 @@ public class CPacketOCDTorcher {
                     case TEXTFIELD_PATTERN_Z:
                         cap.GetPattern().setHeight(pkt.data.value);
                         break;
-                    case NONE:
-                    default:
-                        break;
                 }
                 ctx.get().setPacketHandled(true);
             });
         }
     }
-
-    /*
-    @Override
-    public void readPacketData(PacketBuffer packetBuffer) throws IOException {
-        torcher = packetBuffer.readItemStack();
-        level = packetBuffer.readInt();
-        enabled = packetBuffer.readBoolean();
-        pickUpEnabled = packetBuffer.readBoolean();
-        origin = packetBuffer.readBlockPos();
-        pattern.setHeight(packetBuffer.readInt());
-        pattern.setWidth(packetBuffer.readInt());
-        pattern.setAlternating(packetBuffer.readBoolean());
-    }
-
-    @Override
-    public void writePacketData(PacketBuffer packetBuffer) throws IOException {
-        packetBuffer.writeItemStack(torcher);
-        packetBuffer.writeInt(level);
-        packetBuffer.writeBoolean(enabled);
-        packetBuffer.writeBoolean(pickUpEnabled);
-        packetBuffer.writeBlockPos(origin);
-        packetBuffer.writeInt(pattern.getHeight());
-        packetBuffer.writeInt(pattern.getWidth());
-        packetBuffer.writeBoolean(pattern.isAlternating());
-    }
-
-    @Override
-    public void processPacket(INetHandlerPlayServer iNetHandlerPlayServer) {
-        ModItems.ITEM_OCD_TORCHER.processOCDTorcherEdited(this);
-    }
-    */
 }

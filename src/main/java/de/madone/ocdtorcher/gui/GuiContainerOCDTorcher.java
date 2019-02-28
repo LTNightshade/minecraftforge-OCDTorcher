@@ -110,25 +110,28 @@ public class GuiContainerOCDTorcher extends GuiContainer {
     private void ButtonClicked(Integer buttonId, Boolean state) {
         if (buttonId == 0) {
             if (Enabled != state) {
+                Enabled = state;
                 CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
                         CPacketOCDTorcher.CommandID.BUTTON_ENABLE,
-                        ButtonEnabled.isState() ? 1 : 0
+                        state ? 1 : 0
                 );
                 ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
             }
         } else if (buttonId == 1) {
             if (PickUpEnabled != state) {
+                PickUpEnabled = state;
                 CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
                         CPacketOCDTorcher.CommandID.BUTTON_PICKUP,
-                        ButtonPickup.isState() ? 1 : 0
+                        state ? 1 : 0
                 );
                 ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
             }
         } else if (buttonId == 2) {
             if (Pattern.isAlternating() != state) {
+                Pattern.setAlternating(state);
                 CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
                         CPacketOCDTorcher.CommandID.BUTTON_ALTERNATE,
-                        ButtonAlternating.isState() ? 1 : 0
+                        state ? 1 : 0
                 );
                 ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
             }
@@ -206,7 +209,7 @@ public class GuiContainerOCDTorcher extends GuiContainer {
         //String name = I18n.format("gui.torcher.name");
         //fontRenderer.drawString(name, xSize / 2 - fontRenderer.getStringWidth(name) / 2, 6, 0x404040);
         fontRenderer.drawString(inventoryPlayer.getDisplayName().getUnformattedComponentText(), 8, ySize - 94, 0x404040);
-        fontRenderer.drawString(Origin.toString(), 108/2, 52/2, 0x404040);
+        fontRenderer.drawString(String.format("%d,%d,%d", Origin.getX(), Origin.getY(), Origin.getZ()), 108/2, 52/2, 0x404040);
         tf_pattern_x.drawTextField(0, 0, 0);
         tf_pattern_z.drawTextField(0, 0, 0);
     }

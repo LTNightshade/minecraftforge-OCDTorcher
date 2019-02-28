@@ -119,9 +119,10 @@ public class ItemOCDTorcher extends Item {
         long t = worldIn.getGameTime();
         if (t % 20 != 0)
             return;
+        if(!(stack.getItem() instanceof ItemOCDTorcher))
+            return;
 
         CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
-        cap.SetPickupEnabled(!cap.GetPickupEnabled());
 
         if (entityIn instanceof EntityPlayerMP) {
             EntityPlayerMP player = (EntityPlayerMP) entityIn;
