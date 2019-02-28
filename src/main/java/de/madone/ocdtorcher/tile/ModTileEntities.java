@@ -24,37 +24,30 @@ public class ModTileEntities {
     //public static TileEntityType<?> testTETileEntityType;
 
     public static void Init(RegistryEvent.Register<TileEntityType<?>> event) {
-        for(Block b : ModBlocks.BLOCKS) {
+        for (Block b : ModBlocks.BLOCKS) {
             if (b instanceof ITileEntityRegistry)
-                registerTileEntityType(event.getRegistry(), register("tile_"+b.getRegistryName().getPath(), ((ITileEntityRegistry)b).getTETBuilder()), "tile_"+b.getRegistryName().getPath());
+                registerTileEntityType(event.getRegistry(), register("tile_" + b.getRegistryName().getPath(), ((ITileEntityRegistry) b).getTileEntityTypeBuilder()), "tile_" + b.getRegistryName().getPath());
         }
     }
 
-    protected static <T extends TileEntityType<?>> T registerTileEntityType(IForgeRegistry<TileEntityType<?>> registry, T tileEntityType, String name)
-    {
+    protected static <T extends TileEntityType<?>> T registerTileEntityType(IForgeRegistry<TileEntityType<?>> registry, T tileEntityType, String name) {
         register(registry, tileEntityType, new ResourceLocation(name));
         return tileEntityType;
     }
 
-    protected static <T extends IForgeRegistryEntry<T>> T register(IForgeRegistry<T> registry, T thing, ResourceLocation name)
-    {
+    protected static <T extends IForgeRegistryEntry<T>> T register(IForgeRegistry<T> registry, T thing, ResourceLocation name) {
         thing.setRegistryName(name);
         registry.register(thing);
         return thing;
     }
 
-    public static <T extends TileEntity> TileEntityType<T> register(String id, TileEntityType.Builder<T> builder)
-    {
+    public static <T extends TileEntity> TileEntityType<T> register(String id, TileEntityType.Builder<T> builder) {
         Type<?> type = null;
 
-        try
-        {
+        try {
             type = DataFixesManager.getDataFixer().getSchema(DataFixUtils.makeKey(1519)).getChoiceType(TypeReferences.BLOCK_ENTITY, id);
-        }
-        catch (IllegalArgumentException illegalstateexception)
-        {
-            if (SharedConstants.developmentMode)
-            {
+        } catch (IllegalArgumentException illegalstateexception) {
+            if (SharedConstants.developmentMode) {
                 throw illegalstateexception;
             }
         }
@@ -62,4 +55,6 @@ public class ModTileEntities {
         TileEntityType<T> tileEntityType = builder.build(type);
         return tileEntityType;
     }
+
+
 }

@@ -5,6 +5,7 @@ import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.capability.ModCapabilities;
 import de.madone.ocdtorcher.config.ModConfig;
 import de.madone.ocdtorcher.gui.ModGuiHandler;
+import de.madone.ocdtorcher.item.ItemOCDTorcher;
 import de.madone.ocdtorcher.item.ModItems;
 import de.madone.ocdtorcher.network.ModNetwork;
 import de.madone.ocdtorcher.tile.ModTileEntities;
@@ -12,15 +13,19 @@ import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionType;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ModDimension;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import net.minecraftforge.fml.event.lifecycle.*;
@@ -33,8 +38,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.stream.Collectors;
 
+//region Eventlist
 /*
-
 in order of firing:
 
 RegistryEvent.NewRegistry
@@ -64,13 +69,14 @@ FMLServerStartedEvent
 Special events:
 FMLFingerprintViolationEvent
 FMLModIdMappingEvent
-
-
- */
+*/
+//endregion
 
 public class ModRegistry {
 
     protected final Logger LOGGER = LogManager.getLogger();
+
+    //region Constructor
 
     public ModRegistry() {
 
@@ -145,6 +151,10 @@ public class ModRegistry {
         // Register ourselves for server, registry and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
+
+    //endregion
+
+    //region Events
 
     private void onNewRegistry(final RegistryEvent.NewRegistry event) {
         LOGGER.info("Registering Registries...");
@@ -249,4 +259,19 @@ public class ModRegistry {
     private void onFMLModIdMappingEvent(final FMLModIdMappingEvent event) {
         LOGGER.info("Starting FMLModIdMappingEvent");
     }
+
+    @SubscribeEvent
+    public static void onAttachCapatilityonItemStacks(final AttachCapabilitiesEvent<ItemStack> event) {
+        if (event.getObject().getItem() instanceof ItemOCDTorcher) {
+            event.addCapability(CapabilityOCDTorcher.RLOC, new CapabilityOCDTorcher.Provider());
+        }
+    }
+
+    //endregion
+
+
+
+
+
+
 }

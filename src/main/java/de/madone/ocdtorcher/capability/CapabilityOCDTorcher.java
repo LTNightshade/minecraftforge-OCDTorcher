@@ -1,6 +1,7 @@
 package de.madone.ocdtorcher.capability;
 
 import de.madone.ocdtorcher.ocdtorcher;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -28,10 +29,6 @@ public class CapabilityOCDTorcher {
     public static final ResourceLocation RLOC = new ResourceLocation(ocdtorcher.ModId, "ocd_torcher_capability");
 
     public interface ICapabilityOCDTorcher extends INBTSerializable<NBTTagCompound> {
-
-        int GetLevel();
-
-        void SetLevel(int level);
 
         BlockPos GetOrigin();
 
@@ -94,23 +91,11 @@ public class CapabilityOCDTorcher {
 
     public class Implementation implements ICapabilityOCDTorcher {
 
-        private int level = -1;
         private BlockPos origin = new BlockPos(0, 0, 0);
         private OCDTorcherPattern pattern = new OCDTorcherPattern(12,6,true);
         private boolean enabled = true;
         private boolean pickUpEnabled = true;
         private ItemStackHandler itemHandler = new ItemStackHandler(4);
-
-
-        @Override
-        public int GetLevel() {
-            return this.level;
-        }
-
-        @Override
-        public void SetLevel(int level) {
-            this.level = level;
-        }
 
         @Override
         public BlockPos GetOrigin() {
@@ -161,7 +146,6 @@ public class CapabilityOCDTorcher {
         public NBTTagCompound serializeNBT() {
             NBTTagCompound tag = new NBTTagCompound();
             tag.setTag("inventory", itemHandler.serializeNBT());
-            tag.setInt("level", this.level);
             tag.setLong("origin", origin.toLong());
             tag.setBoolean("enabled", enabled);
             tag.setBoolean("pickUpEnabled", pickUpEnabled);
@@ -173,7 +157,6 @@ public class CapabilityOCDTorcher {
         public void deserializeNBT(NBTTagCompound nbt) {
             itemHandler.deserializeNBT(nbt.getCompound("inventory"));
             pattern.deserializeNBT(nbt.getCompound("pattern"));
-            this.level = nbt.getInt("level");
             this.origin = BlockPos.fromLong(nbt.getLong("origin"));
             this.enabled = nbt.getBoolean("enabled");
             this.pickUpEnabled = nbt.getBoolean("pickUpEnabled");

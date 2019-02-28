@@ -2,12 +2,10 @@ package de.madone.ocdtorcher.gui;
 
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.container.ContainerOCDTorcher;
-import de.madone.ocdtorcher.item.ItemOCDTorcher;
 import de.madone.ocdtorcher.network.ModNetwork;
 import de.madone.ocdtorcher.network.client.CPacketOCDTorcher;
 import de.madone.ocdtorcher.ocdtorcher;
 import de.madone.ocdtorcher.stuff.OCDTorcherPattern;
-import net.minecraft.client.gui.GuiCommandBlockBase;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -18,33 +16,40 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
+import java.awt.*;
+
 public class GuiContainerOCDTorcher extends GuiContainer {
 
     public static final ResourceLocation BG_TEXTURE = new ResourceLocation(ocdtorcher.ModId, "textures/gui/gui_torcher.png");
     private InventoryPlayer inventoryPlayer;
-    CapabilityOCDTorcher.ICapabilityOCDTorcher cap;
-    ItemStack stack;
-    EntityPlayer player;
+    //private CapabilityOCDTorcher.ICapabilityOCDTorcher cap;
+    private ItemStack stack;
+    private EntityPlayer player;
+    private ContainerOCDTorcher container;
 
-    GuiToggleImageButton ButtonEnabled;
-    GuiToggleImageButton ButtonPickup;
-    GuiToggleImageButton ButtonAlternating;
-    GuiTextField tf_origin_x;
-    GuiTextField tf_origin_z;
-    GuiTextField tf_pattern_x;
-    GuiTextField tf_pattern_z;
+    private GuiToggleImageButton ButtonEnabled;
+    private GuiToggleImageButton ButtonPickup;
+    private GuiToggleImageButton ButtonAlternating;
+    private GuiTextField tf_pattern_x;
+    private GuiTextField tf_pattern_z;
 
-    private boolean enabled;
-    private boolean pickUpEnabled;
-    private BlockPos origin;
-    private int level;
-    private OCDTorcherPattern pattern;
+    private boolean Enabled;
+    private boolean PickUpEnabled;
+    private BlockPos Origin;
+    private OCDTorcherPattern Pattern;
+
 
     public GuiContainerOCDTorcher(ContainerOCDTorcher container) {
         super(container);
+        this.container = container;
         stack = container.getTorcher();
         player = container.getPlayer();
-        cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
+
+        this.Enabled = container.isEnabled();
+        this.PickUpEnabled = container.isPickUpEnabled();
+        this.Origin = container.getOrigin();
+        this.Pattern = container.getPattern();
+
         inventoryPlayer = container.getPlayer().inventory;
         xSize = 348 / 2;
         ySize = 348 / 2;
@@ -55,145 +60,115 @@ public class GuiContainerOCDTorcher extends GuiContainer {
     @Override
     protected void initGui() {
         super.initGui();
-        origin = cap.GetOrigin();
-        pattern = cap.GetPattern();
+        this.Enabled = container.isEnabled();
+        this.PickUpEnabled = container.isPickUpEnabled();
+        this.Origin = container.getOrigin();
+        this.Pattern = container.getPattern();
+
         ButtonEnabled = new GuiToggleImageButton(0, guiLeft + (107 / 2), guiTop + (14 / 2));
+        ButtonEnabled.setState(Enabled);
         ButtonEnabled.setClickHandler(this::ButtonClicked);
         ButtonPickup = new GuiToggleImageButton(1, guiLeft + (259 / 2), guiTop + (14 / 2));
+        ButtonPickup.setState(PickUpEnabled);
         ButtonPickup.setClickHandler(this::ButtonClicked);
         ButtonAlternating = new GuiToggleImageButton(2, guiLeft + (107 / 2), guiTop + (158 / 2));
+        ButtonAlternating.setState(Pattern.isAlternating());
         ButtonAlternating.setClickHandler(this::ButtonClicked);
-        tf_origin_x = new GuiTextField(4, fontRenderer, guiLeft + (108 / 2), guiTop + (51 / 2), 50, 14) {
+        tf_pattern_x = new GuiTextField(6, fontRenderer, (108 / 2), (87 / 2), 30, 14) {
             @Override
             public void setFocused(boolean p_146195_1_) {
                 super.setFocused(p_146195_1_);
                 if (p_146195_1_) {
-                    GuiContainerOCDTorcher.this.tf_origin_z.setFocused(false);
-                    GuiContainerOCDTorcher.this.tf_pattern_x.setFocused(false);
-                    GuiContainerOCDTorcher.this.tf_pattern_z.setFocused(false);
-                }
-            }
-        };
-        tf_origin_x.setMaxStringLength(6);
-        tf_origin_x.setTextAcceptHandler(this::TextAccepted);
-        tf_origin_x.setText(String.format("%d", origin.getX()));
-        tf_origin_z = new GuiTextField(5, fontRenderer, guiLeft + (147 / 2), guiTop + (51 / 2), 50, 14) {
-            @Override
-            public void setFocused(boolean p_146195_1_) {
-                super.setFocused(p_146195_1_);
-                if (p_146195_1_) {
-                    GuiContainerOCDTorcher.this.tf_origin_x.setFocused(false);
-                    GuiContainerOCDTorcher.this.tf_pattern_x.setFocused(false);
-                    GuiContainerOCDTorcher.this.tf_pattern_z.setFocused(false);
-                }
-            }
-        };
-        tf_origin_z.setMaxStringLength(6);
-        tf_origin_z.setTextAcceptHandler(this::TextAccepted);
-        tf_origin_z.setText(String.format("%d", origin.getZ()));
-        tf_pattern_x = new GuiTextField(6, fontRenderer, guiLeft + (108 / 2), guiTop + (87 / 2), 30, 14) {
-            @Override
-            public void setFocused(boolean p_146195_1_) {
-                super.setFocused(p_146195_1_);
-                if (p_146195_1_) {
-                    GuiContainerOCDTorcher.this.tf_origin_x.setFocused(false);
-                    GuiContainerOCDTorcher.this.tf_origin_z.setFocused(false);
                     GuiContainerOCDTorcher.this.tf_pattern_z.setFocused(false);
                 }
             }
         };
         tf_pattern_x.setMaxStringLength(2);
+        tf_pattern_x.setText(String.format("%d", Pattern.getWidth()));
         tf_pattern_x.setTextAcceptHandler(this::TextAccepted);
-        tf_pattern_x.setText(String.format("%d", pattern.getWidth()));
-        tf_pattern_z = new GuiTextField(7, fontRenderer, guiLeft + (108 / 2), guiTop + (123 / 2), 30, 14) {
+        tf_pattern_z = new GuiTextField(7, fontRenderer, (108 / 2), (123 / 2), 30, 14) {
             @Override
             public void setFocused(boolean p_146195_1_) {
                 super.setFocused(p_146195_1_);
                 if (p_146195_1_) {
-                    GuiContainerOCDTorcher.this.tf_origin_x.setFocused(false);
                     GuiContainerOCDTorcher.this.tf_pattern_x.setFocused(false);
-                    GuiContainerOCDTorcher.this.tf_origin_z.setFocused(false);
                 }
             }
         };
         tf_pattern_z.setMaxStringLength(2);
+        tf_pattern_z.setText(String.format("%d", Pattern.getHeight()));
         tf_pattern_z.setTextAcceptHandler(this::TextAccepted);
-        tf_pattern_z.setText(String.format("%d", pattern.getHeight()));
 
         addButton(ButtonEnabled);
         addButton(ButtonPickup);
         addButton(ButtonAlternating);
 
-        this.children.add(tf_origin_x);
-        this.children.add(tf_origin_z);
         this.children.add(tf_pattern_x);
         this.children.add(tf_pattern_z);
     }
 
     private void ButtonClicked(Integer buttonId, Boolean state) {
-        boolean flag = false;
         if (buttonId == 0) {
-            if (this.enabled != state) {
-                this.enabled = state;
-                flag = true;
+            if (Enabled != state) {
+                CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
+                        CPacketOCDTorcher.CommandID.BUTTON_ENABLE,
+                        ButtonEnabled.isState() ? 1 : 0
+                );
+                ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
             }
         } else if (buttonId == 1) {
-            if (this.pickUpEnabled != state) {
-                this.pickUpEnabled = state;
-                flag = true;
+            if (PickUpEnabled != state) {
+                CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
+                        CPacketOCDTorcher.CommandID.BUTTON_PICKUP,
+                        ButtonPickup.isState() ? 1 : 0
+                );
+                ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
             }
         } else if (buttonId == 2) {
-            if (this.pattern.isAlternating() != state) {
-                this.pattern.setAlternating(state);
-                flag = true;
+            if (Pattern.isAlternating() != state) {
+                CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
+                        CPacketOCDTorcher.CommandID.BUTTON_ALTERNATE,
+                        ButtonAlternating.isState() ? 1 : 0
+                );
+                ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
             }
-        }
-        if (flag) {
-            CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
-                    stack,
-                    this.level,
-                    this.enabled,
-                    this.pickUpEnabled,
-                    this.origin,
-                    this.pattern
-            );
-            ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
         }
     }
 
     private void TextAccepted(Integer button, String s) {
-        boolean flag = false;
-        if (button == 4) {
-            if (this.origin.getX() != Integer.parseInt(s)) {
-                this.origin = new BlockPos(Integer.parseInt(s), origin.getY(), origin.getZ());
-                flag = true;
+        int y = TryParse(s);
+        if ((y > 1) & (y < 255)) {
+            switch (button) {
+                case 6:
+                    if (Pattern.getWidth() != y) {
+                        tf_pattern_x.setTextColor(Color.WHITE.getRGB());
+                        CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
+                                CPacketOCDTorcher.CommandID.TEXTFIELD_PATTERN_X,
+                                y
+                        );
+                        ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
+                    }
+                    break;
+                case 7:
+                    if (Pattern.getHeight() != y) {
+                        tf_pattern_z.setTextColor(Color.WHITE.getRGB());
+                        CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
+                                CPacketOCDTorcher.CommandID.TEXTFIELD_PATTERN_Z,
+                                y
+                        );
+                        ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
+                    }
+                    break;
             }
-        } else if (button == 5) {
-            if (this.origin.getZ() != Integer.parseInt(s)) {
-                this.origin = new BlockPos(origin.getX(), origin.getY(), Integer.parseInt(s));
-                flag = true;
+        } else {
+            switch (button) {
+                case 6:
+                    tf_pattern_x.setTextColor(Color.RED.getRGB());
+                    break;
+                case 7:
+                    tf_pattern_z.setTextColor(Color.RED.getRGB());
+                    break;
             }
-        } else if (button == 6) {
-            if (this.pattern.getWidth() != Integer.parseInt(s)) {
-                this.pattern.setWidth(Integer.parseInt(s));
-                flag = true;
-            }
-        } else if (button == 7) {
-            if (this.pattern.getHeight() != Integer.parseInt(s)) {
-                this.pattern.setHeight(Integer.parseInt(s));
-                flag = true;
-            }
-        }
-        if (flag) {
-            CPacketOCDTorcher.PacketTorcher pkt = new CPacketOCDTorcher.PacketTorcher(
-                    stack,
-                    this.level,
-                    this.enabled,
-                    this.pickUpEnabled,
-                    this.origin,
-                    this.pattern
-            );
-            ModNetwork.HANDLER.sendToServer(new CPacketOCDTorcher(pkt));
         }
     }
 
@@ -208,19 +183,74 @@ public class GuiContainerOCDTorcher extends GuiContainer {
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        String name = I18n.format("gui.torcher.name");
-        fontRenderer.drawString(name, xSize / 2 - fontRenderer.getStringWidth(name) / 2, 6, 0x404040);
+        this.Enabled = container.isEnabled();
+        this.PickUpEnabled = container.isPickUpEnabled();
+        this.Origin = container.getOrigin();
+        this.Pattern = container.getPattern();
+
+        if (!tf_pattern_x.getText().equalsIgnoreCase(String.format("%d", Pattern.getWidth()))) {
+            tf_pattern_x.setText(String.format("%d", Pattern.getWidth()));
+        }
+        if (!tf_pattern_z.getText().equalsIgnoreCase(String.format("%d", Pattern.getHeight()))) {
+            tf_pattern_z.setText(String.format("%d", Pattern.getHeight()));
+        }
+        if (ButtonEnabled.isState() != Enabled) {
+            ButtonEnabled.setState(Enabled);
+        }
+        if (ButtonPickup.isState() != PickUpEnabled) {
+            ButtonPickup.setState(PickUpEnabled);
+        }
+        if (ButtonAlternating.isState() != Pattern.isAlternating()) {
+            ButtonAlternating.setState(Pattern.isAlternating());
+        }
+        //String name = I18n.format("gui.torcher.name");
+        //fontRenderer.drawString(name, xSize / 2 - fontRenderer.getStringWidth(name) / 2, 6, 0x404040);
         fontRenderer.drawString(inventoryPlayer.getDisplayName().getUnformattedComponentText(), 8, ySize - 94, 0x404040);
-        tf_origin_x.drawTextField(0, 0, 0);
-        tf_pattern_z.drawTextField(0, 0, 0);
+        fontRenderer.drawString(Origin.toString(), 108/2, 52/2, 0x404040);
         tf_pattern_x.drawTextField(0, 0, 0);
         tf_pattern_z.drawTextField(0, 0, 0);
     }
 
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+        if (tf_pattern_x.isFocused()) {
+            return tf_pattern_x.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+        } else if (tf_pattern_z.isFocused()) {
+            return tf_pattern_z.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+        } else
+            return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
 
     }
 
+    @Override
+    public boolean charTyped(char p_charTyped_1_, int p_charTyped_2_) {
+        if (tf_pattern_x.isFocused()) return tf_pattern_x.charTyped(p_charTyped_1_, p_charTyped_2_);
+        else if (tf_pattern_z.isFocused()) return tf_pattern_z.charTyped(p_charTyped_1_, p_charTyped_2_);
+        return false;
+    }
+
+    @Override
+    public boolean mouseClicked(double x, double y, int button) {
+
+        for (Object o : getChildren()) {
+            if (o instanceof GuiTextField) {
+                GuiTextField tf = ((GuiTextField) o);
+                if (tf.mouseClicked(x - guiLeft, y - guiTop, button))
+                    return true;
+            }
+        }
+        return (super.mouseClicked(x, y, button));
+
+    }
+
+    private int TryParse(String s) {
+        int result;
+
+        try {
+            result = Integer.parseInt(s);
+        } catch (Exception e) {
+            result = 0;
+        }
+        return result;
+    }
 }

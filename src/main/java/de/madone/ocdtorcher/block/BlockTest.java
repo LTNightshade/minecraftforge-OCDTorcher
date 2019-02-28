@@ -1,5 +1,6 @@
 package de.madone.ocdtorcher.block;
 
+import de.madone.ocdtorcher.item.ModItems;
 import de.madone.ocdtorcher.ocdtorcher;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -13,13 +14,15 @@ public class BlockTest extends Block {
     protected String name;
 
     public BlockTest() {
-        super(                Block.Properties.create(Material.IRON)
+        super(
+                Block.Properties.create(Material.IRON)
                         .hardnessAndResistance(15.0f, 15.0f)
                         .lightValue(1)
                         .sound(SoundType.METAL)
         );
         this.name = "test";
         this.setRegistryName(name);
+        CreateItemBlock();
     }
 
     private Item.Properties getDefaultProperties() {
@@ -32,8 +35,8 @@ public class BlockTest extends Block {
                 ;
     }
 
-    public Item getItemBlock() {
-        return new ItemBlock(this, getDefaultProperties()).setRegistryName(this.getRegistryName().getPath());
-
+    private void CreateItemBlock() {
+        ModItems.ITEMS.add(new ItemBlock(this, this.getDefaultProperties()).setRegistryName(this.getRegistryName().getPath()));
     }
+
 }

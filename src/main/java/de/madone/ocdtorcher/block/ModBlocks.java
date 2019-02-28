@@ -15,6 +15,7 @@ public class ModBlocks {
     public static final BlockTest BLOCK_TEST = null;
 
     public static void register(RegistryEvent.Register<Block> blockRegistryEvent){
+
         // Create Instances and add to BLOCKS List.
         BLOCKS.add(new BlockTest());
 

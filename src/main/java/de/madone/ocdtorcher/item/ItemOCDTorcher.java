@@ -45,13 +45,13 @@ public class ItemOCDTorcher extends Item {
                 .group(ocdtorcher.ITEM_GROUP_OCDTORCHER)
         );
         this.name = "ocd_torcher";
-        this.setRegistryName("ocd_torcher");
+        this.setRegistryName(name);
     }
 
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
-        if (this.getClass() == ItemOCDTorcher.class)
+        if (stack.getItem() instanceof ItemOCDTorcher)
             return new CapabilityOCDTorcher.Provider();
         else
             return super.initCapabilities(stack, nbt);
@@ -72,6 +72,7 @@ public class ItemOCDTorcher extends Item {
                 }
             } else {
                 ItemStack is = playerIn.getHeldItem(handIn);
+
                 CapabilityOCDTorcher.ICapabilityOCDTorcher cap = is.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
                 if (cap != null) {
                     IInteractionObject interactionObject = new IInteractionObject() {
@@ -103,6 +104,7 @@ public class ItemOCDTorcher extends Item {
                     };
                     NetworkHooks.openGui((EntityPlayerMP) playerIn, interactionObject);
                     playerIn.displayGui(interactionObject);
+                    return new ActionResult<>(EnumActionResult.SUCCESS, is);
                 }
             }
         }
@@ -118,9 +120,12 @@ public class ItemOCDTorcher extends Item {
         if (t % 20 != 0)
             return;
 
+        CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
+        cap.SetPickupEnabled(!cap.GetPickupEnabled());
+
         if (entityIn instanceof EntityPlayerMP) {
             EntityPlayerMP player = (EntityPlayerMP) entityIn;
-            CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
+            cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
             if (cap != null) {
                 if ((stack == player.getHeldItem(EnumHand.MAIN_HAND)) | (stack == player.getHeldItem(EnumHand.OFF_HAND))) {
                     if (cap.GetPickupEnabled()) {
@@ -137,7 +142,7 @@ public class ItemOCDTorcher extends Item {
 
     private static void PlaceTorches(ItemStack stack, World worldIn, BlockPos position) {
         CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
-        int level = cap.GetLevel() == -1 ? position.getY() : cap.GetLevel();
+        int level = cap.GetOrigin().getY();
         Iterable<BlockPos> area = BlockPos.getAllInBox(position.getX() - Distance, level, position.getZ() - Distance, position.getX() + Distance, level, position.getZ() + Distance);
         for (BlockPos p : area) {
             int w = Math.abs(p.getX() - cap.GetOrigin().getX());
@@ -162,7 +167,7 @@ public class ItemOCDTorcher extends Item {
 
     private static void PickupTorches(ItemStack stack, World worldIn, BlockPos position) {
         CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
-        int level = cap.GetLevel();
+        int level = cap.GetOrigin().getY();
         Iterable<BlockPos> area = null;
         if (level == -1) {
             area = BlockPos.getAllInBox(position.getX() - Distance, position.getY() - Distance, position.getZ() - Distance, position.getX() + Distance, position.getY() + Distance, position.getZ() + Distance);
@@ -187,4 +192,30 @@ public class ItemOCDTorcher extends Item {
         }
     }
 
+    @Override
+    public boolean getShareTag() {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public NBTTagCompound getShareTag(ItemStack stack) {
+        CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
+        if ( cap != null) {
+            NBTTagCompound compound = new NBTTagCompound();
+            compound.setTag("capability", cap.serializeNBT());
+            return compound;
+        }
+        return null;
+    }
+
+    @Override
+    public void readShareTag(ItemStack stack, @Nullable NBTTagCompound nbt) {
+        if (nbt != null) {
+            CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElse(null);
+            if (cap != null) {
+               cap.deserializeNBT(nbt.getCompound("capability"));
+            }
+        }
+    }
 }
