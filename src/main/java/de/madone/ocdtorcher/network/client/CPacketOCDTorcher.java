@@ -1,10 +1,8 @@
 package de.madone.ocdtorcher.network.client;
 
-import com.sun.istack.internal.NotNull;
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.item.ItemOCDTorcher;
 import de.madone.ocdtorcher.network.ModNetwork;
-import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
