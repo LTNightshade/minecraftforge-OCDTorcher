@@ -1,13 +1,11 @@
 package de.madone.ocdtorcher.item;
 
-import com.google.common.collect.AbstractIterator;
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
 import de.madone.ocdtorcher.container.ContainerOCDTorcher;
 import de.madone.ocdtorcher.gui.ModGuiHandler;
 import de.madone.ocdtorcher.ocdtorcher;
 import de.madone.ocdtorcher.stuff.InventoryHelper;
 import de.madone.ocdtorcher.stuff.OCDTorcherPattern;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockTorch;
 import net.minecraft.block.state.IBlockState;
@@ -21,12 +19,15 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceFluidMode;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IInteractionObject;
@@ -35,8 +36,6 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
-import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -72,19 +71,6 @@ public class ItemOCDTorcher extends Item {
         if (!worldIn.isRemote) {
             if (playerIn.isSneaking()) {
                 ItemStack is = playerIn.getHeldItem(handIn);
-                CapabilityOCDTorcher.ICapabilityOCDTorcher cap = is.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
-                BlockPos pos = worldIn.rayTraceBlocks(playerIn.getEyePosition(0), playerIn.getLook(0)).getBlockPos();
-                if (pos != null) {
-                    cap.SetOrigin(pos);
-                    playerIn.sendMessage(new TextComponentString(String.format("Origin -> %d,%d,%d", cap.GetOrigin().getX(), cap.GetOrigin().getY(), cap.GetOrigin().getZ())));
-                    for(BlockPos.MutableBlockPos b : getTorchpositions(cap.GetOrigin(), playerIn.getPosition(), cap.GetPattern()))
-                    {
-                        playerIn.sendMessage(new TextComponentString(String.format("-> %d,%d,%d", b.getX(), b.getY(), b.getZ())));
-                    }
-                    return ActionResult.newResult(EnumActionResult.SUCCESS, is);
-                }
-            } else {
-                ItemStack is = playerIn.getHeldItem(handIn);
 
                 CapabilityOCDTorcher.ICapabilityOCDTorcher cap = is.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
                 IInteractionObject interactionObject = new IInteractionObject() {
@@ -117,6 +103,26 @@ public class ItemOCDTorcher extends Item {
                 NetworkHooks.openGui((EntityPlayerMP) playerIn, interactionObject);
                 playerIn.displayGui(interactionObject);
                 return new ActionResult<>(EnumActionResult.SUCCESS, is);
+
+            } else {
+                ItemStack is = playerIn.getHeldItem(handIn);
+                CapabilityOCDTorcher.ICapabilityOCDTorcher cap = is.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
+                double x = playerIn.getEyePosition(playerIn.getEyeHeight()).x;
+                double y = playerIn.getEyePosition(playerIn.getEyeHeight()).y;
+                double z = playerIn.getEyePosition(playerIn.getEyeHeight()).z;
+                BlockPos pos = worldIn.rayTraceBlocks(
+                        playerIn.getEyePosition(playerIn.getEyeHeight()),
+                        new Vec3d((playerIn.getLookVec().x * 20) + x, (playerIn.getLookVec().y * 20) + y, (playerIn.getLookVec().z * 20) + z))
+                        .getBlockPos();
+                if (pos != null) {
+                    cap.SetOrigin(pos);
+                    playerIn.sendMessage(new TextComponentString(String.format("Pos -> %d,%d,%d", pos.getX(), pos.getY(), pos.getZ())));
+                    playerIn.sendMessage(new TextComponentString(String.format("Origin -> %d,%d,%d", cap.GetOrigin().getX(), cap.GetOrigin().getY(), cap.GetOrigin().getZ())));
+                    for (BlockPos.MutableBlockPos b : getTorchpositions(cap.GetOrigin(), pos, cap.GetPattern())) {
+                        playerIn.sendMessage(new TextComponentString(String.format("-> %d,%d,%d", b.getX(), b.getY(), b.getZ())));
+                    }
+                    return new ActionResult<>(EnumActionResult.SUCCESS, is);
+                }
             }
         }
         return super.onItemRightClick(worldIn, playerIn, handIn);
@@ -153,23 +159,21 @@ public class ItemOCDTorcher extends Item {
     @SuppressWarnings("ConstantConditions")
     private static void PlaceTorches(ItemStack stack, World worldIn, BlockPos position) {
         CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
-        int level = cap.GetOrigin().getY() + 1;
-        Iterable<BlockPos> area = BlockPos.getAllInBox(position.getX() - Distance, level, position.getZ() - Distance, position.getX() + Distance, level, position.getZ() + Distance);
+        int level = cap.GetOrigin().getY();
+        if (Math.abs(position.getY() - level) > 4)
+            return;
+        Iterable<BlockPos.MutableBlockPos> area = getTorchpositions(cap.GetOrigin().up(), position, cap.GetPattern());
         for (BlockPos p : area) {
-            int w = Math.abs(p.getX() - cap.GetOrigin().getX());
-            int h = Math.abs(p.getZ() - cap.GetOrigin().getZ());
-            if (cap.GetPattern().PositionMatches(p, cap.GetOrigin())) {
-                IBlockState bs = worldIn.getBlockState(p);
-                if ((bs instanceof BlockTorch) | (!(bs.getBlock() instanceof BlockAir)))
-                    continue;
-                bs = worldIn.getBlockState(p.down());
-                if ((bs.getBlock() instanceof BlockAir))
-                    continue;
-                if (bs.canPlaceTorchOnTop(worldIn, p.down())) {
-                    ItemStack is = InventoryHelper.ExtractItem(new ItemStack(Item.BLOCK_TO_ITEM.get(Blocks.TORCH)), 1, cap.GetInventory());
-                    if (!is.isEmpty()) {
-                        worldIn.setBlockState(p, Blocks.TORCH.getDefaultState(), 3);
-                    }
+            IBlockState bs = worldIn.getBlockState(p);
+            if ((bs.getBlock() instanceof BlockTorch) | (!(bs.getBlock() instanceof BlockAir)))
+                continue;
+            bs = worldIn.getBlockState(p.down());
+            if ((bs.getBlock() instanceof BlockAir))
+                continue;
+            if (bs.canPlaceTorchOnTop(worldIn, p.down())) {
+                ItemStack is = InventoryHelper.ExtractItem(new ItemStack(Item.BLOCK_TO_ITEM.get(Blocks.TORCH)), 1, cap.GetInventory());
+                if (!is.isEmpty()) {
+                    worldIn.setBlockState(p, Blocks.TORCH.getDefaultState(), 3);
                 }
             }
         }
@@ -179,13 +183,19 @@ public class ItemOCDTorcher extends Item {
     private static void PickupTorches(ItemStack stack, World worldIn, BlockPos position) {
         CapabilityOCDTorcher.ICapabilityOCDTorcher cap = stack.getCapability(CapabilityOCDTorcher.OCD_TORCHER_CAPABILITY).orElseThrow(NullPointerException::new);
         int level = cap.GetOrigin().getY() + 1;
-        Iterable<BlockPos> area = BlockPos.getAllInBox(position.getX() - Distance, level, position.getZ() - Distance, position.getX() + Distance, level, position.getZ() + Distance);
-        for (BlockPos p : area) {
-            int w = Math.abs(p.getX() - cap.GetOrigin().getX());
-            int h = Math.abs(p.getZ() - cap.GetOrigin().getZ());
-            if (!cap.GetPattern().PositionMatches(p, cap.GetOrigin())) {
+        if (Math.abs(position.getY() - level) > 4)
+            return;
+        Iterable<BlockPos.MutableBlockPos> area = getTorchpositions(cap.GetOrigin().up(), position, cap.GetPattern());
+        Iterable<BlockPos.MutableBlockPos> area2 = BlockPos.getAllInBoxMutable(
+                position.getX() - Distance, level, position.getZ() - Distance,
+                position.getX() + Distance, level, position.getZ() + Distance
+        );
+
+
+        for (BlockPos.MutableBlockPos p : area2) {
+            if (!BlockPosInList(p, area)) {
                 IBlockState bs = worldIn.getBlockState(p);
-                if (bs instanceof BlockTorch) {
+                if (bs.getBlock() instanceof BlockTorch) {
                     ItemStack is = InventoryHelper.InsertItem(new ItemStack(Item.BLOCK_TO_ITEM.get(Blocks.TORCH), 1), cap.GetInventory());
                     if (is.isEmpty()) {
                         worldIn.setBlockState(p, Blocks.AIR.getDefaultState(), 3);
@@ -196,6 +206,13 @@ public class ItemOCDTorcher extends Item {
                 }
             }
         }
+    }
+
+    private static boolean BlockPosInList(BlockPos.MutableBlockPos p, Iterable<BlockPos.MutableBlockPos> area) {
+        for (BlockPos.MutableBlockPos mp : area) {
+            if (p.equals(mp)) return true;
+        }
+        return false;
     }
 
     @Override
@@ -225,30 +242,47 @@ public class ItemOCDTorcher extends Item {
     private static ArrayList<BlockPos.MutableBlockPos> getTorchpositions(BlockPos origin, BlockPos position, OCDTorcherPattern pattern) {
         ArrayList<BlockPos.MutableBlockPos> result = new ArrayList<>();
         BlockPos.MutableBlockPos org = new BlockPos.MutableBlockPos(position.getX() - origin.getX(), origin.getY(), position.getZ() - origin.getZ());
-        int x = -Distance;
-        int z = -Distance;
 
-        while (z <= Distance) {
-            while (x <= Distance) {
-                if (pattern.isAlternating()) {
-                    if ((z % pattern.getHeight() == 0) & (((z / pattern.getHeight()) % 2) == 0)) {
-                        if ((x - pattern.getHeight()) % pattern.getWidth() == 0)
-                            result.add(new BlockPos.MutableBlockPos(x + org.getX(), origin.getY(), z + org.getZ()));
-                    } else {
-                        if (x % pattern.getWidth() == 0)
-                            result.add(new BlockPos.MutableBlockPos(x + org.getX(), origin.getY(), z + org.getZ()));
-                    }
+        int row = org.getZ() / pattern.getHeight();
+        int rx = Math.floorDiv(org.getX() , pattern.getWidth()) * pattern.getWidth();
+        int rz = Math.floorDiv(org.getZ() , pattern.getHeight() * (pattern.isAlternating() ? 2 : 1)) * pattern.getHeight()* (pattern.isAlternating() ? 2 : 1);
 
-                } else {
-                    if ((x % pattern.getWidth() == 0) & (z % pattern.getHeight() == 0))
-                        result.add(new BlockPos.MutableBlockPos(x + org.getX(), origin.getY(), z + org.getZ()));
-                }
-                x++;
-            }
-            x = -Distance;
-            z++;
+        org = new BlockPos.MutableBlockPos(rx + origin.getX(), origin.getY(), rz + origin.getZ());
+
+        int x;
+        int z;
+        int y = origin.getY();
+        int ox = pattern.getWidth() / 2;
+
+        if (!pattern.isAlternating()) {
+            ox = 0;
         }
+        for (z = 0; z <= Distance; z += pattern.getHeight()) {
+            if (row == 0) {
+                for (x = 0; x <= Distance; x += pattern.getWidth()) {
+                    AddToList(result, x , y, z , org);
+                }
+                row = 1;
+
+            } else {
+                for (x = ox; x <= Distance; x += pattern.getWidth()) {
+                    AddToList(result, x , y, z , org);
+                }
+                row = 0;
+            }
+        }
+
         return result;
+    }
+
+    private static void AddToList(ArrayList<BlockPos.MutableBlockPos> list, int x, int y, int z, BlockPos position) {
+        list.add(new BlockPos.MutableBlockPos(position.getX() + x, y, position.getZ() + z));
+        if (x != 0)
+            list.add(new BlockPos.MutableBlockPos(position.getX() - x, y, position.getZ() + z));
+        if (z != 0)
+            list.add(new BlockPos.MutableBlockPos(position.getX() + x, y, position.getZ() - z));
+        if ((x != 0) & (z != 0))
+            list.add(new BlockPos.MutableBlockPos(position.getX() - x, y, position.getZ() - z));
     }
 
 }
