@@ -1,0 +1,12 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "textures": {
+      "all": "ocdtorcher:block/ore_copper"
+    },
+    "model": "ocdtorcher:block_ore_copper"
+  },
+  "variants": {
+    "": [{}]
+  }
+}

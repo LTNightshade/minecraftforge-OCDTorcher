@@ -9,6 +9,7 @@ import de.madone.ocdtorcher.item.ItemOCDTorcher;
 import de.madone.ocdtorcher.item.ModItems;
 import de.madone.ocdtorcher.network.ModNetwork;
 import de.madone.ocdtorcher.tile.ModTileEntities;
+import de.madone.ocdtorcher.world.feature.ModOreFeature;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
@@ -96,7 +97,7 @@ public class ModRegistry {
         // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInterModProcessEvent);
 
         // Mod loading completed
-        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLLoadCompleteEvent);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLLoadCompleteEvent);
 
         // Server before start
         // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLServerAboutToStartEvent);
@@ -234,6 +235,7 @@ public class ModRegistry {
 
     private void onFMLLoadCompleteEvent(final FMLLoadCompleteEvent event) {
         LOGGER.info("Starting FMLLoadCompleteEvent");
+        ModOreFeature.Init();
     }
 
     private void onFMLServerAboutToStartEvent(final FMLServerAboutToStartEvent event) {
