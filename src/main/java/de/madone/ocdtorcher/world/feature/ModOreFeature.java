@@ -1,8 +1,6 @@
 package de.madone.ocdtorcher.world.feature;
 
-import com.google.common.collect.ImmutableList;
 import de.madone.ocdtorcher.block.ModBlocks;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.Feature;
