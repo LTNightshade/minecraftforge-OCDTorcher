@@ -1,7 +1,13 @@
 package de.madone.ocdtorcher.config;
 
+import com.google.common.collect.Lists;
+import de.madone.ocdtorcher.ocdtorcher;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ModConfig {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -22,14 +28,18 @@ public class ModConfig {
             TorchDistance = builder
                     .comment("sets the Reach of the Torcher [0..50|default:20]")
                     .translation("distance.ocdtorcher.config")
-                    .defineInRange("TorcherDistance", 20, 0,50);
+                    .defineInRange("TorcherDistance", 20, 0, 50);
             builder.pop();
         }
 
     }
 
-     public static void Init() {
+
+
+
+    public static void Init() {
         // load Configfile
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, de.madone.ocdtorcher.config.ModConfig.spec);
+
     }
 }

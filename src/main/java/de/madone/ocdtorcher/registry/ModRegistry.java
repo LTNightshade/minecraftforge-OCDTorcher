@@ -212,6 +212,7 @@ public class ModRegistry {
     private void onFMLCommonSetupEvent(final FMLCommonSetupEvent event) {
         LOGGER.info("Starting FMLCommonSetupEvent");
         ModCapabilities.Init();
+        ModOreFeature.Init();
         DeferredWorkQueue.runLater(ModNetwork::Init);
     }
 
@@ -235,7 +236,6 @@ public class ModRegistry {
 
     private void onFMLLoadCompleteEvent(final FMLLoadCompleteEvent event) {
         LOGGER.info("Starting FMLLoadCompleteEvent");
-        ModOreFeature.Init();
     }
 
     private void onFMLServerAboutToStartEvent(final FMLServerAboutToStartEvent event) {
