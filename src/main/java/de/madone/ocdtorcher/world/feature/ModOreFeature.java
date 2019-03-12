@@ -32,19 +32,26 @@ public class ModOreFeature {
         public int minHeight;
         public int maxHeight;
         public int Count;
+        public int Size = 12;
 
-        public OreGenerationBiomeData(int minHeight, int maxHeight, int count) {
+        public OreGenerationBiomeData(int minHeight, int maxHeight, int count, int size) {
             this.minHeight = minHeight;
             this.maxHeight = maxHeight;
             Count = count;
+            Size = size;
         }
     }
 
     public static class OreGenerationOre {
         public HashMap<ResourceLocation, OreGenerationBiomeData> Biomes;
 
-        public OreGenerationOre(ResourceLocation oreName) {
+        public OreGenerationOre() {
             Biomes = new HashMap<>();
+        }
+
+        public OreGenerationOre(ResourceLocation oreName, OreGenerationBiomeData data) {
+            Biomes = new HashMap<>();
+            Biomes.put(oreName, data);
         }
     }
 
@@ -55,10 +62,10 @@ public class ModOreFeature {
             Ores = new HashMap<>();
         }
 
-        public void AddOreConfig(IBlockState state, ResourceLocation biome, int min, int max, int count) {
+        public void AddOreConfig(IBlockState state, ResourceLocation biome, int min, int max, int count, int size) {
             OreGenerationOre Ore;
             if (!Ores.containsKey(state.getBlock().getRegistryName())) {
-                Ore = new OreGenerationOre(state.getBlock().getRegistryName());
+                Ore = new OreGenerationOre(state.getBlock().getRegistryName(), new OreGenerationBiomeData(min, max, count, size));
             } else {
                 Ore = Ores.get(state.getBlock().getRegistryName());
             }
@@ -67,7 +74,7 @@ public class ModOreFeature {
                 Ore.Biomes.get(biome).maxHeight = max;
                 Ore.Biomes.get(biome).Count = count;
             } else {
-                Ore.Biomes.put(biome, new OreGenerationBiomeData( min, max, count));
+                Ore.Biomes.put(biome, new OreGenerationBiomeData(min, max, count, size));
             }
             Ores.put(state.getBlock().getRegistryName(), Ore);
         }
@@ -77,22 +84,20 @@ public class ModOreFeature {
         ReadJsonConfig(new ResourceLocation(ocdtorcher.ModId, "oregeneration/oregeneration.json"));
         SaveJsonConfig(new ResourceLocation(ocdtorcher.ModId, "oregeneration/oregeneration.json"));
         Register();
-        //registerOreOnAllBiomes(ModBlocks.BLOCK_ORE_COPPER.getDefaultState(), 30, 60, 20);
-
     }
 
     private static void Register() {
-        ORE_GENERATION.Ores.forEach((k,v) -> {
+        ORE_GENERATION.Ores.forEach((k, v) -> {
             IBlockState state = RegistryManager.ACTIVE.getRegistry(Block.class).getValue(k).getDefaultState();
-            v.Biomes.forEach((bk,bv) -> {
+            v.Biomes.forEach((bk, bv) -> {
                 Biome biome = RegistryManager.ACTIVE.getRegistry(Biome.class).getValue(bk);
                 if (biome != null) {
-                    if (!( bv.maxHeight == bv.minHeight || (bv.Count == 0 ) )) {
+                    if (!(bv.maxHeight == bv.minHeight || (bv.Count == 0))) {
                         biome.addFeature(
                                 GenerationStage.Decoration.UNDERGROUND_ORES,
                                 Biome.createCompositeFeature(
                                         Feature.MINABLE,
-                                        new MinableConfig(MinableConfig.IS_ROCK, state, 12),
+                                        new MinableConfig(MinableConfig.IS_ROCK, state, bv.Size),
                                         Biome.COUNT_RANGE,
                                         new CountRangeConfig(bv.Count, bv.minHeight, bv.minHeight, bv.maxHeight) // Count, MinHeight, MaxHeightBase, MaxHeight
                                 ));
@@ -110,8 +115,13 @@ public class ModOreFeature {
             OutputStream os = new FileOutputStream(f);
             OutputStreamWriter writer = new OutputStreamWriter(os);
             BufferedWriter r = new BufferedWriter(writer);
-            Gson gson = new GsonBuilder().setPrettyPrinting().enableComplexMapKeySerialization().create();
-            String data = gson.toJson(ORE_GENERATION,OreGeneration.class);
+            Gson gson = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .enableComplexMapKeySerialization()
+                    .registerTypeAdapter(ResourceLocation.class, new ResourceLocationJsonSerializer())
+                    .serializeNulls()
+                    .create();
+            String data = gson.toJson(ORE_GENERATION, OreGeneration.class);
             r.write(data);
             r.flush();
             r.close();
@@ -127,7 +137,11 @@ public class ModOreFeature {
             InputStream is = new FileInputStream(Minecraft.getInstance().gameDir + "/config/" + location.getNamespace() + "/" + location.getPath());
             InputStreamReader reader = new InputStreamReader(is);
             BufferedReader r = new BufferedReader(reader);
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .enableComplexMapKeySerialization()
+                    .registerTypeAdapter(ResourceLocation.class, new ResourceLocationJsonSerializer())
+                    .create();
             ORE_GENERATION = gson.fromJson(r, OreGeneration.class);
             if (ORE_GENERATION == null)
                 ORE_GENERATION = new OreGeneration();
@@ -140,43 +154,17 @@ public class ModOreFeature {
     private static void registerOreOnAllBiomes(IBlockState state, int min, int max, int count) {
         //  int k = random.nextInt(placementConfig.maxHeight - placementConfig.maxHeightBase) + placementConfig.minHeight;
 
-
-        BiomeManager.getBiomes(BiomeManager.BiomeType.WARM).forEach((BiomeManager.BiomeEntry biomeEntry) -> biomeEntry.biome.addFeature(
-                GenerationStage.Decoration.UNDERGROUND_ORES,
-                Biome.createCompositeFeature(
-                        Feature.MINABLE,
-                        new MinableConfig(MinableConfig.IS_ROCK, state, 12),
-                        Biome.COUNT_RANGE,
-                        new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
-                )
-        ));
-        BiomeManager.getBiomes(BiomeManager.BiomeType.COOL).forEach((BiomeManager.BiomeEntry biomeEntry) -> biomeEntry.biome.addFeature(
-                GenerationStage.Decoration.UNDERGROUND_ORES,
-                Biome.createCompositeFeature(
-                        Feature.MINABLE,
-                        new MinableConfig(MinableConfig.IS_ROCK, state, 12),
-                        Biome.COUNT_RANGE,
-                        new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
-                )
-        ));
-        BiomeManager.getBiomes(BiomeManager.BiomeType.DESERT).forEach((BiomeManager.BiomeEntry biomeEntry) -> biomeEntry.biome.addFeature(
-                GenerationStage.Decoration.UNDERGROUND_ORES,
-                Biome.createCompositeFeature(
-                        Feature.MINABLE,
-                        new MinableConfig(MinableConfig.IS_ROCK, state, 12),
-                        Biome.COUNT_RANGE,
-                        new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
-                )
-        ));
-        BiomeManager.getBiomes(BiomeManager.BiomeType.ICY).forEach((BiomeManager.BiomeEntry biomeEntry) -> biomeEntry.biome.addFeature(
-                GenerationStage.Decoration.UNDERGROUND_ORES,
-                Biome.createCompositeFeature(
-                        Feature.MINABLE,
-                        new MinableConfig(MinableConfig.IS_ROCK, state, 12),
-                        Biome.COUNT_RANGE,
-                        new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
-                )
-        ));
+        for (BiomeManager.BiomeType bt : BiomeManager.BiomeType.values()) {
+            BiomeManager.getBiomes(bt).forEach((BiomeManager.BiomeEntry biomeEntry) -> biomeEntry.biome.addFeature(
+                    GenerationStage.Decoration.UNDERGROUND_ORES,
+                    Biome.createCompositeFeature(
+                            Feature.MINABLE,
+                            new MinableConfig(MinableConfig.IS_ROCK, state, 12),
+                            Biome.COUNT_RANGE,
+                            new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
+                    )
+            ));
+        }
 
         oceanBiomes.forEach((Biome biome) -> biome.addFeature(
                 GenerationStage.Decoration.UNDERGROUND_ORES,
