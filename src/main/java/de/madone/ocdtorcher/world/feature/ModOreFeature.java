@@ -13,6 +13,8 @@ import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.MinableConfig;
 import net.minecraft.world.gen.placement.CountRangeConfig;
 import net.minecraftforge.common.BiomeManager;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,9 +90,9 @@ public class ModOreFeature {
 
     private static void Register() {
         ORE_GENERATION.Ores.forEach((k, v) -> {
-            IBlockState state = RegistryManager.ACTIVE.getRegistry(Block.class).getValue(k).getDefaultState();
+            IBlockState state = ForgeRegistries.BLOCKS.getValue(k).getDefaultState();
             v.Biomes.forEach((bk, bv) -> {
-                Biome biome = RegistryManager.ACTIVE.getRegistry(Biome.class).getValue(bk);
+                Biome biome = ForgeRegistries.BIOMES.getValue(bk);
                 if (biome != null) {
                     if (!(bv.maxHeight == bv.minHeight || (bv.Count == 0))) {
                         biome.addFeature(
@@ -154,26 +156,14 @@ public class ModOreFeature {
     private static void registerOreOnAllBiomes(IBlockState state, int min, int max, int count) {
         //  int k = random.nextInt(placementConfig.maxHeight - placementConfig.maxHeightBase) + placementConfig.minHeight;
 
-        for (BiomeManager.BiomeType bt : BiomeManager.BiomeType.values()) {
-            BiomeManager.getBiomes(bt).forEach((BiomeManager.BiomeEntry biomeEntry) -> biomeEntry.biome.addFeature(
-                    GenerationStage.Decoration.UNDERGROUND_ORES,
+        ForgeRegistries.BIOMES.getValues().forEach((Biome b) -> {
+            b.addFeature(GenerationStage.Decoration.UNDERGROUND_ORES,
                     Biome.createCompositeFeature(
                             Feature.MINABLE,
                             new MinableConfig(MinableConfig.IS_ROCK, state, 12),
                             Biome.COUNT_RANGE,
                             new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
-                    )
-            ));
-        }
-
-        oceanBiomes.forEach((Biome biome) -> biome.addFeature(
-                GenerationStage.Decoration.UNDERGROUND_ORES,
-                Biome.createCompositeFeature(
-                        Feature.MINABLE,
-                        new MinableConfig(MinableConfig.IS_ROCK, state, 12),
-                        Biome.COUNT_RANGE,
-                        new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
-                )));
-
+                    ));
+        });
     }
 }
