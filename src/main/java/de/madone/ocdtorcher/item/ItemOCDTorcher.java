@@ -1,6 +1,7 @@
 package de.madone.ocdtorcher.item;
 
 import de.madone.ocdtorcher.capability.CapabilityOCDTorcher;
+import de.madone.ocdtorcher.config.ModConfig;
 import de.madone.ocdtorcher.container.ContainerOCDTorcher;
 import de.madone.ocdtorcher.gui.ModGuiHandler;
 import de.madone.ocdtorcher.ocdtorcher;
@@ -65,6 +66,14 @@ public class ItemOCDTorcher extends Item {
             return super.initCapabilities(stack, nbt);
     }
 
+    @Override
+    public EnumActionResult onItemUse(ItemUseContext p_195939_1_) {
+        if (!p_195939_1_.getPlayer().getEntityWorld().isRemote)
+            return super.onItemUse(p_195939_1_);
+        else
+            return super.onItemUse(p_195939_1_);
+    }
+
     @SuppressWarnings({"NullableProblems", "ConstantConditions"})
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
@@ -101,7 +110,7 @@ public class ItemOCDTorcher extends Item {
                     }
                 };
                 NetworkHooks.openGui((EntityPlayerMP) playerIn, interactionObject);
-                playerIn.displayGui(interactionObject);
+                //playerIn.displayGui(interactionObject);
                 return new ActionResult<>(EnumActionResult.SUCCESS, is);
 
             } else {
@@ -162,7 +171,7 @@ public class ItemOCDTorcher extends Item {
         int level = cap.GetOrigin().getY();
         if (Math.abs(position.getY() - level) > 4)
             return;
-        Iterable<BlockPos.MutableBlockPos> area = getTorchpositions(cap.GetOrigin().up(), position, cap.GetPattern());
+        Iterable<BlockPos> area = OCDTorcherPattern.getAllinDistance(ModConfig.GENERAL.TorchDistance.get(), cap.GetOrigin().up(), position, cap.GetPattern());
         for (BlockPos p : area) {
             IBlockState bs = worldIn.getBlockState(p);
             if ((bs.getBlock() instanceof BlockTorch) | (!(bs.getBlock() instanceof BlockAir)))
@@ -185,14 +194,14 @@ public class ItemOCDTorcher extends Item {
         int level = cap.GetOrigin().getY() + 1;
         if (Math.abs(position.getY() - level) > 4)
             return;
-        Iterable<BlockPos.MutableBlockPos> area = getTorchpositions(cap.GetOrigin().up(), position, cap.GetPattern());
-        Iterable<BlockPos.MutableBlockPos> area2 = BlockPos.getAllInBoxMutable(
+        Iterable<BlockPos> area = OCDTorcherPattern.getAllinDistance(ModConfig.GENERAL.TorchDistance.get(), cap.GetOrigin(), position, cap.GetPattern());
+        Iterable<BlockPos> area2 = BlockPos.getAllInBox(
                 position.getX() - Distance, level, position.getZ() - Distance,
                 position.getX() + Distance, level, position.getZ() + Distance
         );
 
 
-        for (BlockPos.MutableBlockPos p : area2) {
+        for (BlockPos p : area2) {
             if (!BlockPosInList(p, area)) {
                 IBlockState bs = worldIn.getBlockState(p);
                 if (bs.getBlock() instanceof BlockTorch) {
@@ -208,8 +217,8 @@ public class ItemOCDTorcher extends Item {
         }
     }
 
-    private static boolean BlockPosInList(BlockPos.MutableBlockPos p, Iterable<BlockPos.MutableBlockPos> area) {
-        for (BlockPos.MutableBlockPos mp : area) {
+    private static boolean BlockPosInList(BlockPos p, Iterable<BlockPos> area) {
+        for (BlockPos mp : area) {
             if (p.equals(mp)) return true;
         }
         return false;
@@ -243,9 +252,9 @@ public class ItemOCDTorcher extends Item {
         ArrayList<BlockPos.MutableBlockPos> result = new ArrayList<>();
         BlockPos.MutableBlockPos org = new BlockPos.MutableBlockPos(position.getX() - origin.getX(), origin.getY(), position.getZ() - origin.getZ());
 
-        int row = org.getZ() / pattern.getHeight();
-        int rx = Math.floorDiv(org.getX() , pattern.getWidth()) * pattern.getWidth();
-        int rz = Math.floorDiv(org.getZ() , pattern.getHeight() * (pattern.isAlternating() ? 2 : 1)) * pattern.getHeight()* (pattern.isAlternating() ? 2 : 1);
+        int row = Math.floorDiv(org.getZ(), pattern.getHeight());
+        int rx = Math.floorDiv(org.getX(), pattern.getWidth()) * pattern.getWidth();
+        int rz = Math.floorDiv(org.getZ(), pattern.getHeight() * (pattern.isAlternating() ? 2 : 1)) * pattern.getHeight() * (pattern.isAlternating() ? 2 : 1);
 
         org = new BlockPos.MutableBlockPos(rx + origin.getX(), origin.getY(), rz + origin.getZ());
 
@@ -260,13 +269,13 @@ public class ItemOCDTorcher extends Item {
         for (z = 0; z <= Distance; z += pattern.getHeight()) {
             if (row == 0) {
                 for (x = 0; x <= Distance; x += pattern.getWidth()) {
-                    AddToList(result, x , y, z , org);
+                    AddToList(result, x, y, z, org);
                 }
                 row = 1;
 
             } else {
                 for (x = ox; x <= Distance; x += pattern.getWidth()) {
-                    AddToList(result, x , y, z , org);
+                    AddToList(result, x, y, z, org);
                 }
                 row = 0;
             }

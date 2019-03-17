@@ -11,9 +11,10 @@ import java.util.List;
 
 public class ModConfig {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-    private static final ForgeConfigSpec spec = BUILDER.build();
 
     public static final General GENERAL = new General(BUILDER);
+
+    private static final ForgeConfigSpec spec = BUILDER.build();
 
     public static class General {
         public final ForgeConfigSpec.ConfigValue<Boolean> ModEnabled;
@@ -33,9 +34,6 @@ public class ModConfig {
         }
 
     }
-
-
-
 
     public static void Init() {
         // load Configfile

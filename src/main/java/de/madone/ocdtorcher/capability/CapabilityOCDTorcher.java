@@ -90,7 +90,7 @@ public class CapabilityOCDTorcher {
     public class Implementation implements ICapabilityOCDTorcher {
 
         private BlockPos origin = new BlockPos(0, 0, 0);
-        private OCDTorcherPattern pattern = new OCDTorcherPattern(12,6,true);
+        private OCDTorcherPattern pattern = new OCDTorcherPattern(12, 6, true);
         private boolean enabled = true;
         private boolean pickUpEnabled = true;
         private ItemStackHandler itemHandler = new ItemStackHandler(4);

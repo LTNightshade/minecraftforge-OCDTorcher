@@ -30,58 +30,6 @@ public class ModOreFeature {
 
     public static OreGeneration ORE_GENERATION;
 
-    public static class OreGenerationBiomeData {
-        public int minHeight;
-        public int maxHeight;
-        public int Count;
-        public int Size = 12;
-
-        public OreGenerationBiomeData(int minHeight, int maxHeight, int count, int size) {
-            this.minHeight = minHeight;
-            this.maxHeight = maxHeight;
-            Count = count;
-            Size = size;
-        }
-    }
-
-    public static class OreGenerationOre {
-        public HashMap<ResourceLocation, OreGenerationBiomeData> Biomes;
-
-        public OreGenerationOre() {
-            Biomes = new HashMap<>();
-        }
-
-        public OreGenerationOre(ResourceLocation oreName, OreGenerationBiomeData data) {
-            Biomes = new HashMap<>();
-            Biomes.put(oreName, data);
-        }
-    }
-
-    public static class OreGeneration {
-        public HashMap<ResourceLocation, OreGenerationOre> Ores;
-
-        public OreGeneration() {
-            Ores = new HashMap<>();
-        }
-
-        public void AddOreConfig(IBlockState state, ResourceLocation biome, int min, int max, int count, int size) {
-            OreGenerationOre Ore;
-            if (!Ores.containsKey(state.getBlock().getRegistryName())) {
-                Ore = new OreGenerationOre(state.getBlock().getRegistryName(), new OreGenerationBiomeData(min, max, count, size));
-            } else {
-                Ore = Ores.get(state.getBlock().getRegistryName());
-            }
-            if (Ore.Biomes.containsKey(biome)) {
-                Ore.Biomes.get(biome).minHeight = min;
-                Ore.Biomes.get(biome).maxHeight = max;
-                Ore.Biomes.get(biome).Count = count;
-            } else {
-                Ore.Biomes.put(biome, new OreGenerationBiomeData(min, max, count, size));
-            }
-            Ores.put(state.getBlock().getRegistryName(), Ore);
-        }
-    }
-
     public static void Init() {
         ReadJsonConfig(new ResourceLocation(ocdtorcher.ModId, "oregeneration/oregeneration.json"));
         SaveJsonConfig(new ResourceLocation(ocdtorcher.ModId, "oregeneration/oregeneration.json"));
@@ -154,16 +102,12 @@ public class ModOreFeature {
     }
 
     private static void registerOreOnAllBiomes(IBlockState state, int min, int max, int count) {
-        //  int k = random.nextInt(placementConfig.maxHeight - placementConfig.maxHeightBase) + placementConfig.minHeight;
-
-        ForgeRegistries.BIOMES.getValues().forEach((Biome b) -> {
-            b.addFeature(GenerationStage.Decoration.UNDERGROUND_ORES,
-                    Biome.createCompositeFeature(
-                            Feature.MINABLE,
-                            new MinableConfig(MinableConfig.IS_ROCK, state, 12),
-                            Biome.COUNT_RANGE,
-                            new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
-                    ));
-        });
+        ForgeRegistries.BIOMES.getValues().forEach((Biome biome) -> biome.addFeature(GenerationStage.Decoration.UNDERGROUND_ORES,
+                Biome.createCompositeFeature(
+                        Feature.MINABLE,
+                        new MinableConfig(MinableConfig.IS_ROCK, state, 12),
+                        Biome.COUNT_RANGE,
+                        new CountRangeConfig(count, min, min, max) // Count, MinHeight, MaxHeightBase, MaxHeight
+                )));
     }
 }
